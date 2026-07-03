@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/L Resource Hub — Past Papers & Training</title>
+    <style>
+        /* ── CSS Variables ── */
+        :root {
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.25);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+            /* Dark mode defaults */
+            --bg-body: #0f172a;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --accent-color: #3b82f6;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.07);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --lbl-bg: rgba(255, 255, 255, 0.02);
+            --lbl-border: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Light mode */
+        body.light-mode {
+            --bg-body: #f8fafc;
+            --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(0, 0, 0, 0.08);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --lbl-bg: #f8fafc;
+            --lbl-border: #cbd5e1;
+        }
+
+        /* Subject themes — dark */
+        body.theme-physics:not(.light-mode)   { --bg-gradient: linear-gradient(135deg, #0b1528 0%, #1e1b4b 50%, #0f172a 100%); --accent-color: #6366f1; }
+        body.theme-chemistry:not(.light-mode) { --bg-gradient: linear-gradient(135deg, #061f14 0%, #022c22 50%, #0f172a 100%); --accent-color: #10b981; }
+        body.theme-biology:not(.light-mode)   { --bg-gradient: linear-gradient(135deg, #2a0812 0%, #4c0519 50%, #0f172a 100%); --accent-color: #f43f5e; }
+        body.theme-maths:not(.light-mode)     { --bg-gradient: linear-gradient(135deg, #0a1628 0%, #1a2744 50%, #0f172a 100%); --accent-color: #8b5cf6; }
+
+        /* Subject themes — light */
+        body.theme-physics.light-mode   { --bg-gradient: linear-gradient(135deg, #f0f3ff 0%, #e0e7ff 100%); --accent-color: #4f46e5; }
+        body.theme-chemistry.light-mode { --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); --accent-color: #059669; }
+        body.theme-biology.light-mode   { --bg-gradient: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); --accent-color: #e11d48; }
+        body.theme-maths.light-mode     { --bg-gradient: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); --accent-color: #7c3aed; }
+
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            transition: background 0.5s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* ── Ambient bg glow ── */
+        .bg-orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(90px); transition: background 0.6s; }
+        .bg-orb-1 { width: 500px; height: 500px; top: -100px; right: -100px; background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%); animation: driftA 12s ease-in-out infinite alternate; }
+        .bg-orb-2 { width: 400px; height: 400px; bottom: -80px; left: -80px; background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%); animation: driftB 15s ease-in-out infinite alternate; }
+        @keyframes driftA { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(30px, 40px) scale(1.15); } }
+        @keyframes driftB { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(-20px, -30px) scale(1.1); } }
+
+        /* ── Layout ── */
+        .container { max-width: 980px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
+
+        /* ── Page Header ── */
+        .page-header { text-align: center; margin-bottom: 48px; }
+        .page-header h1 { font-size: 44px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.1; background: linear-gradient(135deg, var(--text-main) 30%, var(--accent-color) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+        body.light-mode .page-header h1 { background: linear-gradient(135deg, #0f172a 30%, var(--accent-color) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .page-header p { color: var(--text-muted); font-size: 17px; }
+
+        /* ── Quick Jump Bar ── */
+        .quick-jump { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .quick-jump select, .quick-jump button { background: var(--card-bg); border: 1.5px solid var(--card-border); color: var(--text-main); padding: 12px 18px; border-radius: 12px; font-size: 14px; backdrop-filter: blur(10px); outline: none; transition: 0.3s; }
+        .quick-jump select:focus { border-color: var(--accent-color); }
+        .quick-jump select option { background: var(--bg-body); color: var(--text-main); }
+        .quick-jump button { background: var(--accent-color); color: #fff; font-weight: 600; cursor: pointer; border: none; }
+        .quick-jump button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        .quick-jump button.secondary-btn { background: var(--lbl-bg); color: var(--text-main); border: 1.5px solid var(--card-border); }
+        .quick-jump button.secondary-btn:hover { border-color: var(--accent-color); }
+
+        /* ── SPA Screens ── */
+        .app-screen { display: none; opacity: 0; transform: scale(0.98) translateY(10px); transition: opacity 0.35s ease, transform 0.35s ease; }
+        .app-screen.active { display: block; opacity: 1; transform: scale(1) translateY(0); }
+
+        /* ── Section Tabs ── */
+        .section-tabs { display: flex; gap: 12px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
+        .section-tab { padding: 13px 28px; border-radius: 50px; border: 1.5px solid var(--card-border); background: var(--card-bg); backdrop-filter: blur(12px); color: var(--text-muted); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.25s ease; }
+        .section-tab:hover { border-color: var(--accent-color); color: var(--text-main); }
+        .section-tab.active { background: var(--accent-color); border-color: var(--accent-color); color: #fff; }
+
+        /* ── Cards Grid ── */
+        .subject-grid, .ms-grid, .qbt-grid, .favorites-grid { display: grid; gap: 18px; }
+        .subject-grid, .ms-grid { grid-template-columns: repeat(4, 1fr); }
+        .qbt-grid { grid-template-columns: repeat(2, 1fr); } /* 2x2 grid for 4 items */
+        .favorites-grid { grid-template-columns: repeat(2, 1fr); }
+        
+        .subject-card, .qbt-card, .fav-card {
+            background: var(--card-bg); border: 2px solid var(--card-border); backdrop-filter: blur(16px);
+            border-radius: 24px; padding: 30px 16px; text-align: center; cursor: pointer;
+            box-shadow: var(--card-shadow); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); position: relative; overflow: hidden;
+        }
+        .subject-card:hover, .fav-card:hover, .qbt-card:hover { transform: translateY(-9px); border-color: var(--c-accent, var(--accent-color)); box-shadow: 0 22px 45px rgba(0,0,0,0.18); }
+        .subject-card .icon, .qbt-card .icon { font-size: 46px; margin-bottom: 14px; display: block; transition: transform 0.3s; }
+        .subject-card:hover .icon, .qbt-card:hover .icon { transform: scale(1.15) rotate(4deg); }
+        .subject-card h3, .fav-card h3, .qbt-card h3 { font-size: 19px; font-weight: 800; color: var(--text-main); }
+        .subject-card .sub-label, .fav-card p, .qbt-card p { font-size: 12px; color: var(--text-muted); margin-top: 6px; letter-spacing: 0.5px; }
+
+        .card-physics   { --c-accent: #6366f1; }
+        .card-chemistry { --c-accent: #10b981; }
+        .card-biology   { --c-accent: #f43f5e; }
+        .card-maths     { --c-accent: #8b5cf6; }
+
+        /* ── Delete Fav Button ── */
+        .del-fav-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,50,50,0.2); border: none; color: #ff5555; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; transition: 0.2s; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+        .del-fav-btn:hover { background: #ff5555; color: #fff; }
+
+        /* ── Base UI Elements ── */
+        .back-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+        .btn-back { background: var(--lbl-bg); border: 1.5px solid var(--card-border); color: var(--text-main); padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; display: flex; align-items: center; gap: 7px; }
+        .btn-back:hover { background: rgba(128,128,128,0.2); border-color: var(--accent-color); }
+        .breadcrumb { font-size: 13px; color: var(--text-muted); display: flex; gap: 6px; align-items: center; }
+        .breadcrumb span { color: var(--text-main); font-weight: 600; }
+        .screen-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+        .screen-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; }
+        .info-banner { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px; font-size: 14px; color: var(--text-muted); }
+
+        /* ── PDF & Parts Grids ── */
+        .years-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 13px; margin-top: 10px; }
+        .year-btn { background: var(--card-bg); border: 1.5px solid var(--card-border); backdrop-filter: blur(12px); color: var(--text-main); padding: 18px 10px; border-radius: 14px; font-size: 18px; font-weight: 800; cursor: pointer; text-align: center; transition: all 0.25s ease; }
+        .year-btn:hover { background: var(--accent-color); color: #fff; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .parts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 10px; }
+        .part-btn { background: var(--card-bg); border: 2px solid var(--card-border); backdrop-filter: blur(16px); color: var(--text-main); padding: 28px 16px; border-radius: 18px; font-size: 17px; font-weight: 800; cursor: pointer; text-align: center; transition: all 0.3s ease; }
+        .part-btn:hover { background: var(--accent-color); color: #fff; transform: translateY(-5px); box-shadow: 0 16px 35px rgba(0,0,0,0.2); }
+        
+        /* ── PDF Viewer ── */
+        .pdf-viewer-wrap { background: var(--card-bg); border: 1.5px solid var(--card-border); backdrop-filter: blur(16px); border-radius: 20px; padding: 28px; box-shadow: var(--card-shadow); margin-top: 10px; }
+        .pdf-viewer-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+        .pdf-title { font-size: 20px; font-weight: 800; }
+        .pdf-meta { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+        .pdf-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-action { background: var(--lbl-bg); border: 1.5px solid var(--card-border); color: var(--text-main); padding: 11px 18px; border-radius: 11px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 7px; }
+        .btn-action:hover { border-color: var(--accent-color); }
+        .btn-action.primary { background: linear-gradient(135deg, var(--accent-color), #1d4ed8); color: #fff; border: none; box-shadow: 0 4px 14px rgba(0,0,0,0.2); }
+        .btn-action.primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,0.25); }
+        
+        .pdf-embed-area { width: 100%; height: 600px; border: 1.5px solid var(--card-border); border-radius: 12px; overflow: hidden; background: #1e293b; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: var(--text-muted); }
+        .pdf-embed-area iframe { width: 100%; height: 100%; border: none; }
+
+        /* ── Toast Notifications ── */
+        .toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: rgba(15, 23, 42, 0.95); border: 1px solid var(--accent-color); color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.3); backdrop-filter: blur(10px); animation: slideUp 0.3s forwards, fadeOut 0.4s 2.5s forwards; }
+        body.light-mode .toast { background: rgba(255, 255, 255, 0.95); color: #000; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* ── Draggable Study Timer Widget ── */
+        .timer-widget { 
+            position: fixed; bottom: 25px; left: 25px; z-index: 9990; 
+            background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(20px); 
+            padding: 12px 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            display: none; align-items: center; gap: 12px; 
+            transition: border-radius 0.3s ease, background 0.3s ease, padding 0.3s ease;
+            user-select: none;
+        }
+        /* Hidden initially, shown via button */
+        .timer-widget.visible { display: flex; }
+
+        /* Inner layout when maximized */
+        .timer-inner { display: flex; align-items: center; gap: 12px; transition: opacity 0.2s; }
+        
+        /* Drag Handle */
+        .drag-handle { cursor: grab; font-size: 18px; color: var(--text-muted); padding: 5px; margin-left: -5px; }
+        .drag-handle:active { cursor: grabbing; }
+
+        .timer-display { font-family: monospace; font-size: 24px; font-weight: 800; color: var(--text-main); letter-spacing: 2px; }
+        .timer-controls { display: flex; gap: 6px; }
+        .timer-btn { background: var(--lbl-bg); border: 1px solid var(--card-border); color: var(--text-main); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .timer-btn:hover { background: var(--accent-color); color: #fff; }
+        .timer-btn.close { color: #ff5555; }
+        .timer-btn.close:hover { background: #ff5555; color: #fff; border-color: #ff5555; }
+
+        /* Minimized State */
+        .timer-min-icon { display: none; font-size: 22px; cursor: pointer; }
+        .timer-widget.minimized {
+            padding: 0; width: 50px; height: 50px; border-radius: 50%; justify-content: center; cursor: pointer;
+        }
+        .timer-widget.minimized .timer-inner { display: none; }
+        .timer-widget.minimized .timer-min-icon { display: block; }
+
+        /* ── Theme FAB ── */
+        .theme-fab { position: fixed; bottom: 25px; right: 25px; z-index: 999; width: 52px; height: 52px; border-radius: 50%; background: var(--accent-color); border: none; color: #fff; font-size: 22px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.3); transition: transform 0.2s; }
+        .theme-fab:hover { transform: scale(1.12); }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) { 
+            .subject-grid, .ms-grid, .qbt-grid { grid-template-columns: repeat(2, 1fr); } 
+            .favorites-grid { grid-template-columns: 1fr; } 
+        }
+        @media (max-width: 480px) { 
+            .subject-grid, .qbt-grid { grid-template-columns: 1fr; } 
+            .quick-jump { flex-direction: column; } 
+        }
+    </style>
+</head>
+<body class="theme-home">
+
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<button class="theme-fab" id="themeFab" title="Toggle light/dark mode">🌙</button>
+
+<!-- Toast Notifications -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Draggable & Minimizable Study Timer Widget -->
+<div class="timer-widget" id="timerWidget">
+    <!-- Minimized Icon (Shows only when collapsed) -->
+    <div class="timer-min-icon" onclick="toggleMinimizeTimer()" title="Expand Timer">⏱️</div>
+    
+    <!-- Expanded view -->
+    <div class="timer-inner" id="timerInner">
+        <div class="drag-handle" id="dragHandle" title="Drag to move">⋮⋮</div>
+        <div class="timer-display" id="timerDisplay">00:00:00</div>
+        <div class="timer-controls">
+            <button class="timer-btn" onclick="togglePlayTimer()" id="playPauseBtn" title="Play/Pause">▶</button>
+            <button class="timer-btn" onclick="resetTimer()" title="Reset">↺</button>
+            <button class="timer-btn" onclick="toggleMinimizeTimer()" title="Minimize to icon">➖</button>
+            <button class="timer-btn close" onclick="toggleTimerVisibility()" title="Close Timer">✖</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="page-header">
+        <h1>A/L Resource Hub</h1>
+        <p>Past Papers · Marking Schemes · Question-Based Training</p>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div class="app-screen active" id="screen-dashboard">
+
+        <!-- Quick Jump Search Bar -->
+        <div class="quick-jump">
+            <select id="jumpSubject">
+                <option value="physics">⚛️ Physics</option>
+                <option value="chemistry">🧪 Chemistry</option>
+                <option value="biology">🧬 Biology</option>
+                <option value="maths">📐 Combined Maths</option>
+            </select>
+            <select id="jumpType">
+                <option value="pp">Past Papers</option>
+                <option value="ms">Marking Scheme</option>
+            </select>
+            <select id="jumpYear">
+                <script>
+                    for(let y=2025; y>=2000; y--) document.write(`<option value="${y}">${y}</option>`);
+                </script>
+            </select>
+            <button onclick="executeQuickJump()">Jump 🚀</button>
+            <button class="secondary-btn" onclick="toggleTimerVisibility()">⏱️ Toggle Timer</button>
+        </div>
+
+        <div class="section-tabs">
+            <button class="section-tab active" onclick="switchTab(this,'past-papers')">📄 Past Papers</button>
+            <button class="section-tab" onclick="switchTab(this,'marking-schemes')">✅ Marking Schemes</button>
+            <button class="section-tab" onclick="switchTab(this,'qbt')">🧠 Questions Training</button>
+            <button class="section-tab" onclick="switchTab(this,'favorites'); loadFavorites();">⭐ Favorites</button>
+        </div>
+
+        <!-- Panels -->
+        <div id="panel-past-papers">
+            <div class="subject-grid">
+                <div class="subject-card card-physics" onclick="openSubject('physics','pp')">
+                    <span class="icon">⚛️</span><h3>Physics</h3><div class="sub-label">2000 – 2025</div>
+                </div>
+                <div class="subject-card card-chemistry" onclick="openSubject('chemistry','pp')">
+                    <span class="icon">🧪</span><h3>Chemistry</h3><div class="sub-label">2000 – 2025</div>
+                </div>
+                <div class="subject-card card-biology" onclick="openSubject('biology','pp')">
+                    <span class="icon">🧬</span><h3>Biology</h3><div class="sub-label">2000 – 2025</div>
+                </div>
+                <div class="subject-card card-maths" onclick="openSubject('maths','pp')">
+                    <span class="icon">📐</span><h3>Combined Maths</h3><div class="sub-label">2000 – 2025</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-marking-schemes" style="display:none;">
+            <div class="info-banner"><span class="ib-icon">💡</span><div>Select a subject to browse official marking schemes by year.</div></div>
+            <div class="ms-grid">
+                <div class="subject-card card-physics" onclick="openSubject('physics','ms')"><span class="icon">⚛️</span><h3>Physics</h3></div>
+                <div class="subject-card card-chemistry" onclick="openSubject('chemistry','ms')"><span class="icon">🧪</span><h3>Chemistry</h3></div>
+                <div class="subject-card card-biology" onclick="openSubject('biology','ms')"><span class="icon">🧬</span><h3>Biology</h3></div>
+                <div class="subject-card card-maths" onclick="openSubject('maths','ms')"><span class="icon">📐</span><h3>Combined Maths</h3></div>
+            </div>
+        </div>
+
+        <div id="panel-qbt" style="display:none;">
+            <div class="info-banner"><span class="ib-icon">🚀</span><div>AI-powered question-based training to target your weak spots.</div></div>
+            <div class="qbt-grid">
+                <div class="qbt-card card-physics"><span class="icon">⚛️</span><h3>Physics</h3><p>Mechanics, Waves, Fields, Electricity</p></div>
+                <div class="qbt-card card-chemistry"><span class="icon">🧪</span><h3>Chemistry</h3><p>Organic, Inorganic & Physical Chemistry</p></div>
+                <!-- NEW: Biology and Maths for QBT -->
+                <div class="qbt-card card-biology"><span class="icon">🧬</span><h3>Biology</h3><p>Genetics, Ecology, Physiology, Plant Biology</p></div>
+                <div class="qbt-card card-maths"><span class="icon">📐</span><h3>Combined Maths</h3><p>Pure Maths (Algebra/Calculus) & Applied Maths (Stat/Vectors)</p></div>
+            </div>
+        </div>
+
+        <div id="panel-favorites" style="display:none;">
+            <div class="info-banner"><span class="ib-icon">⭐</span><div>Your bookmarked past papers and marking schemes will appear here.</div></div>
+            <div class="favorites-grid" id="favoritesGrid"></div>
+        </div>
+    </div>
+
+    <!-- SCREENS -->
+    <div class="app-screen" id="screen-years">
+        <div class="back-nav"><button class="btn-back" onclick="goBack('dashboard')">← Back</button><div class="breadcrumb" id="bc-years"></div></div>
+        <div class="screen-title" id="years-title"></div>
+        <div class="years-grid" id="years-grid"></div>
+    </div>
+
+    <div class="app-screen" id="screen-parts">
+        <div class="back-nav"><button class="btn-back" onclick="goBack('years')">← Back</button><div class="breadcrumb" id="bc-parts"></div></div>
+        <div class="screen-title" id="parts-title"></div>
+        <div class="parts-grid" id="parts-grid"></div>
+    </div>
+
+    <div class="app-screen" id="screen-pdf">
+        <div class="back-nav"><button class="btn-back" id="pdf-back-btn" onclick="goBack('parts')">← Back</button><div class="breadcrumb" id="bc-pdf"></div></div>
+        <div class="pdf-viewer-wrap">
+            <div class="pdf-viewer-header">
+                <div>
+                    <div class="pdf-title" id="pdf-title"></div>
+                    <div class="pdf-meta" id="pdf-meta"></div>
+                </div>
+                <div class="pdf-actions">
+                    <button class="btn-action" onclick="toggleTimerVisibility()">⏱️ Timer</button>
+                    <button class="btn-action" onclick="saveToFavorites()">⭐ Favorite</button>
+                    <button class="btn-action" onclick="copyLink()">🔗 Copy Link</button>
+                    <a id="pdf-download-link" href="#" download onclick="showToast('Download started!')"><button class="btn-action primary">⬇ Download PDF</button></a>
+                </div>
+            </div>
+            <div class="pdf-embed-area" id="pdf-embed-area"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const setText = (id, text) => { if($(id)) $(id).textContent = text; };
+let state = { subject: null, year: null, part: null, section: null, currentPdfUrl: null };
+const SUBJECTS = { physics: { label: 'Physics', emoji: '⚛️', theme: 'theme-physics' }, chemistry: { label: 'Chemistry', emoji: '🧪', theme: 'theme-chemistry' }, biology: { label: 'Biology', emoji: '🧬', theme: 'theme-biology' }, maths: { label: 'Combined Maths', emoji: '📐', theme: 'theme-maths' } };
+const YEARS = Array.from({ length: 26 }, (_, i) => 2000 + i);
+
+/* =========================================
+   DRAGGABLE & MINIMIZABLE TIMER LOGIC
+========================================= */
+const timerWidget = $('timerWidget');
+const dragHandle = $('dragHandle');
+let timerInterval;
+let seconds = 0;
+let isPlaying = false;
+let isDragging = false;
+let offsetX, offsetY;
+
+// Update UI
+function updateTimerDisplay() {
+    const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    $('timerDisplay').textContent = `${h}:${m}:${s}`;
+}
+
+// Timer Controls
+function togglePlayTimer() {
+    if (isPlaying) { clearInterval(timerInterval); $('playPauseBtn').textContent = '▶'; } 
+    else { timerInterval = setInterval(() => { seconds++; updateTimerDisplay(); }, 1000); $('playPauseBtn').textContent = '⏸'; }
+    isPlaying = !isPlaying;
+}
+function resetTimer() { clearInterval(timerInterval); seconds = 0; isPlaying = false; $('playPauseBtn').textContent = '▶'; updateTimerDisplay(); }
+
+// Visibility & Minimize
+function toggleTimerVisibility() {
+    timerWidget.classList.toggle('visible');
+    if(timerWidget.classList.contains('visible') && timerWidget.classList.contains('minimized')) {
+        timerWidget.classList.remove('minimized');
+    }
+}
+function toggleMinimizeTimer() {
+    timerWidget.classList.toggle('minimized');
+}
+
+// Dragging Logic
+dragHandle.addEventListener('pointerdown', (e) => {
+    isDragging = true;
+    const rect = timerWidget.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    dragHandle.style.cursor = 'grabbing';
+});
+
+document.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    
+    // Calculate new position ensuring it stays within the window bounds
+    let newX = e.clientX - offsetX;
+    let newY = e.clientY - offsetY;
+    
+    // Bounds check
+    newX = Math.max(0, Math.min(newX, window.innerWidth - timerWidget.offsetWidth));
+    newY = Math.max(0, Math.min(newY, window.innerHeight - timerWidget.offsetHeight));
+    
+    timerWidget.style.left = `${newX}px`;
+    timerWidget.style.top = `${newY}px`;
+    timerWidget.style.bottom = 'auto';
+    timerWidget.style.right = 'auto';
+});
+
+document.addEventListener('pointerup', () => {
+    isDragging = false;
+    dragHandle.style.cursor = 'grab';
+});
+
+/* =========================================
+   UTILITIES & NAVIGATION
+========================================= */
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    $('toastContainer').appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function saveToFavorites() {
+    let favs = JSON.parse(localStorage.getItem('al_favs') || '[]');
+    const id = `${state.subject}-${state.year}-${state.part}-${state.section}`;
+    if (!favs.some(f => f.id === id)) {
+        favs.push({ id, ...state, emoji: SUBJECTS[state.subject].emoji });
+        localStorage.setItem('al_favs', JSON.stringify(favs));
+        showToast('⭐ Saved to Favorites!');
+    } else { showToast('Already in Favorites!'); }
+}
+
+function loadFavorites() {
+    let favs = JSON.parse(localStorage.getItem('al_favs') || '[]');
+    const grid = $('favoritesGrid');
+    if (favs.length === 0) { grid.innerHTML = '<p style="color:var(--text-muted)">No favorites added yet.</p>'; return; }
+    grid.innerHTML = favs.map(f => `
+        <div class="fav-card card-${f.subject}" onclick="loadFavItem('${f.subject}','${f.section}',${f.year},'${f.part}')">
+            <button class="del-fav-btn" onclick="event.stopPropagation(); removeFav('${f.id}')">✖</button>
+            <span class="icon">${f.emoji}</span>
+            <h3>${SUBJECTS[f.subject].label} ${f.year}</h3>
+            <p>${f.section.toUpperCase()} - ${f.part.replace('-',' ')}</p>
+        </div>
+    `).join('');
+}
+function removeFav(id) {
+    let favs = JSON.parse(localStorage.getItem('al_favs') || '[]');
+    localStorage.setItem('al_favs', JSON.stringify(favs.filter(f => f.id !== id)));
+    showToast('Removed from Favorites');
+    loadFavorites();
+}
+function loadFavItem(sub, sec, yr, pt) { openSubject(sub, sec); openYear(yr); openPdf(pt); }
+function copyLink() { navigator.clipboard.writeText(state.currentPdfUrl); showToast('🔗 Link copied to clipboard!'); }
+function executeQuickJump() { openSubject($('jumpSubject').value, $('jumpType').value); openYear(parseInt($('jumpYear').value)); }
+
+function showScreen(id) {
+    document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
+    setTimeout(() => $(id).classList.add('active'), 30);
+}
+function goBack(target) {
+    if (target === 'dashboard') { applyTheme(null); showScreen('screen-dashboard'); }
+    else if (target === 'years') showScreen('screen-years');
+    else if (target === 'parts') showScreen('screen-parts');
+}
+function switchTab(btn, panel) {
+    document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    ['past-papers', 'marking-schemes', 'qbt', 'favorites'].forEach(p => { $(`panel-${p}`).style.display = p === panel ? '' : 'none'; });
+}
+
+function applyTheme(theme) {
+    document.body.className = document.body.classList.contains('light-mode') ? 'light-mode' : '';
+    if(theme) document.body.classList.add(theme); else document.body.classList.add('theme-home');
+}
+$('themeFab').addEventListener('click', () => { 
+    document.body.classList.toggle('light-mode'); 
+    $('themeFab').textContent = document.body.classList.contains('light-mode') ? '☀️' : '🌙'; 
+});
+
+/* =========================================
+   VIEWS & GENERATION
+========================================= */
+function openSubject(subject, section) {
+    state.subject = subject; state.section = section;
+    const cfg = SUBJECTS[subject];
+    applyTheme(cfg.theme);
+    $('bc-years').innerHTML = `Home / ${cfg.emoji} ${cfg.label} / <span>${section.toUpperCase()}</span>`;
+    setText('years-title', `${cfg.emoji} ${cfg.label} — ${section === 'ms' ? 'Marking Schemes' : 'Past Papers'}`);
+    $('years-grid').innerHTML = YEARS.map(y => `<button class="year-btn" onclick="openYear(${y})">${y}</button>`).join('');
+    showScreen('screen-years');
+}
+
+function openYear(year) {
+    state.year = year;
+    const cfg = SUBJECTS[state.subject];
+    const parts = state.subject === 'maths' 
+        ? [{k:'pure', l:'Pure Maths', i:'📘'}, {k:'applied', l:'Applied Maths', i:'📙'}]
+        : [{k:'part1', l:'Part 1 (MCQ)', i:'📄'}, {k:'part2', l:'Part 2 (Essay)', i:'📝'}];
+
+    $('bc-parts').innerHTML = `Home / ${cfg.emoji} ${cfg.label} / ${state.section.toUpperCase()} / <span>${year}</span>`;
+    setText('parts-title', `${cfg.emoji} ${cfg.label} ${year}`);
+    $('parts-grid').innerHTML = parts.map(p => `<button class="part-btn" onclick="openPdf('${p.k}')"><span class="part-icon">${p.i}</span>${p.l}</button>`).join('');
+    showScreen('screen-parts');
+}
+
+function openPdf(partKey) {
+    state.part = partKey;
+    const cfg = SUBJECTS[state.subject];
+    const pdfUrl = `https://your-cdn.com/al-papers/${state.subject}/${state.section}/${state.year}/${partKey}.pdf`;
+    state.currentPdfUrl = pdfUrl;
+    
+    $('bc-pdf').innerHTML = `Home / ${cfg.emoji} ${cfg.label} / ${state.year} / <span>${partKey.toUpperCase()}</span>`;
+    setText('pdf-title', `${cfg.emoji} ${cfg.label} ${state.year} — ${partKey.toUpperCase()}`);
+    setText('pdf-meta', `${state.section.toUpperCase()} · Sri Lanka A/L Examination`);
+    $('pdf-download-link').href = pdfUrl;
+
+    $('pdf-embed-area').innerHTML = `
+        <div class="pdf-placeholder">
+            <span class="big-icon">📄</span>
+            <p>PDF Placeholder. Link: <code>${pdfUrl}</code></p>
+        </div>`;
+    
+    showScreen('screen-pdf');
+}
+</script>
+</body>
+</html>
