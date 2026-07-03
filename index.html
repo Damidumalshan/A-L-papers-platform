@@ -206,6 +206,20 @@
             .subject-grid, .qbt-grid { grid-template-columns: 1fr; } 
             .quick-jump { flex-direction: column; } 
         }
+
+        /* ── Mobile Performance Fixes (backdrop-filter blur + bg animations are heavy on phones) ── */
+        @media (max-width: 900px) {
+            .subject-card, .qbt-card, .fav-card,
+            .quick-jump select, .quick-jump button,
+            .section-tab, .year-btn, .part-btn,
+            .pdf-viewer-wrap, .timer-widget, .info-banner {
+                backdrop-filter: none;
+            }
+            .bg-orb-1, .bg-orb-2 { animation: none; }
+        }
+
+        /* Prevent drag gesture from fighting with page scroll on touch devices */
+        .timer-widget, .drag-handle { touch-action: none; }
     </style>
 </head>
 <body class="theme-home">
